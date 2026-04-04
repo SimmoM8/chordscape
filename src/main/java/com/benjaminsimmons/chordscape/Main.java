@@ -37,7 +37,7 @@ public class Main {
         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE);
 
         // Step 3: Create the window
-        window = GLFW.glfwCreateWindow(1280, 720, "Chordscape", MemoryUtil.NULL, MemoryUtil.NULL);
+        window = GLFW.glfwCreateWindow(720, 720, "Chordscape", MemoryUtil.NULL, MemoryUtil.NULL);
         if (window == MemoryUtil.NULL) {
             throw new RuntimeException("Failed to create GLFW window");
         }
@@ -62,9 +62,16 @@ public class Main {
     }
 
     private void loop() {
+        float lastTime = (float) GLFW.glfwGetTime();
         while (!GLFW.glfwWindowShouldClose(window)) {
+            float currentTime = (float) GLFW.glfwGetTime();
+            float deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+
             // Process window/input events
             GLFW.glfwPollEvents();
+
+            update(deltaTime);
 
             // For now we are not drawing anything fancy yet
             // Later this is where rendering will happen
@@ -73,6 +80,11 @@ public class Main {
             // Present the rendered frame
             GLFW.glfwSwapBuffers(window);
         }
+    }
+
+    private void update(float deltaTime) {
+        // Update game logic here (e.g., handle input, update object states)
+        renderer.updateCircleColors(deltaTime);
     }
 
     private void render() {
