@@ -15,44 +15,6 @@ public class RenderCircle {
     private double colorTimer = 0.0;
     private final double colorSpeed = 0.1;
 
-    public void init() {
-        vao = GL30.glGenVertexArrays();
-        GL30.glBindVertexArray(vao);
-
-        vbo = GL15.glGenBuffers();
-        GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertices, GL15.GL_DYNAMIC_DRAW);
-
-        // position attribute
-        GL20.glVertexAttribPointer(0, 2, GL15.GL_FLOAT, false, 5 * Float.BYTES, 0);
-        GL20.glEnableVertexAttribArray(0);
-
-        // color attribute
-        GL20.glVertexAttribPointer(1, 3, GL15.GL_FLOAT, false, 5 * Float.BYTES, 2 * Float.BYTES);
-        GL20.glEnableVertexAttribArray(1);
-    }
-
-    public void render() {
-        GL30.glBindVertexArray(vao);
-        GL30.glDrawArrays(GL30.GL_TRIANGLES, 0, segments * 3);
-    }
-
-    public void cleanup() {
-        GL15.glDeleteBuffers(vbo);
-        GL30.glDeleteVertexArrays(vao);
-    }
-
-    public void updateCircleColors(double deltaTime) {
-        colorTimer += deltaTime;
-
-        if (colorTimer >= colorSpeed) {
-            colorTimer = 0.0;
-            float[] vertices = generateCircle(0.0f, 0.0f, 0.7f, segments);
-            GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
-            GL15.glBufferSubData(GL15.GL_ARRAY_BUFFER, 0, vertices);
-        }
-    }
-
     private float getRandomColor() {
         return (float) Math.random();
     }
@@ -67,7 +29,7 @@ public class RenderCircle {
         return verticeColors;
     }
 
-    private float[] generateCircle(float centreX, float centreY, float radius, int segments) {
+    public float[] generateCircle(float centreX, float centreY, float radius, int segments) {
 
         float[] points = generateCirclePoints(centreX, centreY, radius, segments);
         float[] verticeColors = generateRandomColorForCirclePoint(segments);

@@ -9,13 +9,20 @@ public class ShaderProgram {
     public void init() {
         String vertexShaderSrc = """
                 #version 330 core
+                
                 layout (location = 0) in vec2 position;
                 layout (location = 1) in vec3 color;
-
+                
                 out vec3 vertexColor;
-
+                
+                uniform vec2 uPosition;
+                uniform vec2 uScale;
+                
                 void main() {
-                    gl_Position = vec4(position, 0.0, 1.0);
+                    vec2 scaled = position * uScale;
+                    vec2 worldPos = scaled + uPosition;
+                
+                    gl_Position = vec4(worldPos, 0.0, 1.0);
                     vertexColor = color;
                 }
                 """;
@@ -46,6 +53,11 @@ public class ShaderProgram {
 
         GL20.glDeleteShader(vertexShaderId);
         GL20.glDeleteShader(fragmentShaderId);
+    }
+
+    public void setUniform2f(String name, float x, float y) {
+        int location = GL20.glGetUniformLocation(programId, name);
+        GL20.glUniform2f(location, x, y);
     }
 
     private int compileShader(int type, String source) {

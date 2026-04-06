@@ -1,7 +1,6 @@
 package com.benjaminsimmons.chordscape.app;
 
-import com.benjaminsimmons.chordscape.graphics.Renderer;
-import com.benjaminsimmons.chordscape.graphics.ShaderProgram;
+import com.benjaminsimmons.chordscape.graphics.*;
 import org.lwjgl.glfw.GLFW;
 
 public class Application {
@@ -9,6 +8,11 @@ public class Application {
     private final Window window;
     private final Renderer renderer;
     private final ShaderProgram shaderProgram;
+    private Transform transform;
+
+    private RenderCircle renderCircle;
+
+    private Mesh testMesh;
 
     public Application() {
         this.window = new Window(720, 720, "Chordscape");
@@ -25,6 +29,15 @@ public class Application {
     private void init() {
         window.init();
         shaderProgram.init();
+
+        float[] triangleVertices = {
+                // x, y,     r, g, b
+                0.0f,  0.5f, 1.0f, 0.0f, 0.0f,
+                -0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+                0.5f, -0.5f, 0.0f, 0.0f, 1.0f
+        };
+        transform = new Transform(0.0f, 0.0f);
+        testMesh = new Mesh(triangleVertices, org.lwjgl.opengl.GL11.GL_TRIANGLES);
     }
 
     private void loop() {
@@ -38,6 +51,9 @@ public class Application {
             // Process window/input events
             window.pollEvents();
 
+            // Update application state (e.g., move objects, handle input)
+            transform.x += 0.5f * deltaTime;
+
             render();
 
             // Present the rendered frame
@@ -47,9 +63,11 @@ public class Application {
 
     private void render() {
         renderer.clear(0.08f, 0.12f, 0.18f, 1.0f);
+        renderer.draw(testMesh, shaderProgram, transform);
     }
 
     private void cleanup() {
+        testMesh.cleanup();
         shaderProgram.cleanup();
         window.cleanup();
     }

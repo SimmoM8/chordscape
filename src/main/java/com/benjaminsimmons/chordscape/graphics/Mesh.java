@@ -12,8 +12,8 @@ public class Mesh {
     private final int vertexCount;
     private final int drawMode;
 
-    public Mesh(float[] vertices, int vertexCount, int drawMode) {
-        this.vertexCount = vertexCount;
+    public Mesh(float[] vertices, int drawMode) {
+        this.vertexCount = vertices.length / 5;
         this.drawMode = drawMode;
 
         vaoId = GL30.glGenVertexArrays();

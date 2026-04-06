@@ -9,9 +9,14 @@ public class Renderer {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
     }
 
-    public void draw(Mesh mesh, ShaderProgram shaderProgram) {
-        shaderProgram.bind();
+    public void draw(Mesh mesh, ShaderProgram shader, Transform transform) {
+        shader.bind();
+
+        shader.setUniform2f("uPosition", transform.x, transform.y);
+        shader.setUniform2f("uScale", transform.scaleX, transform.scaleY);
+
         mesh.render();
-        shaderProgram.unbind();
+
+        shader.unbind();
     }
 }
