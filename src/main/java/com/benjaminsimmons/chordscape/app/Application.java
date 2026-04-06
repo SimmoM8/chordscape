@@ -1,18 +1,22 @@
 package com.benjaminsimmons.chordscape.app;
 
+import com.benjaminsimmons.chordscape.game.GameObject;
+import com.benjaminsimmons.chordscape.game.TestObject;
 import com.benjaminsimmons.chordscape.graphics.*;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL11;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Application {
 
     private final Window window;
     private final Renderer renderer;
     private final ShaderProgram shaderProgram;
-    private Transform transform;
 
-    private RenderCircle renderCircle;
-
-    private Mesh testMesh;
+    private Mesh triangleMesh;
+    private final List<GameObject> objects = new ArrayList<>();
 
     public Application() {
         this.window = new Window(720, 720, "Chordscape");
@@ -36,14 +40,24 @@ public class Application {
                 -0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
                 0.5f, -0.5f, 0.0f, 0.0f, 1.0f
         };
-        transform = new Transform(0.0f, 0.0f);
-        testMesh = new Mesh(triangleVertices, org.lwjgl.opengl.GL11.GL_TRIANGLES);
+
+        triangleMesh = new Mesh(triangleVertices, GL11.GL_TRIANGLES);
+
+        objects.add(new TestObject(
+                triangleMesh,
+                new Transform(-0.5f, 0.0f, 0.25f, 0.25f)
+        ));
+
+        objects.add(new TestObject(
+                triangleMesh,
+                new Transform(0.0f, 0.0f, 0.8f, 0.8f)
+        ));
     }
 
     private void loop() {
         float lastTime = (float) GLFW.glfwGetTime();
+
         while (!window.shouldClose()) {
-            window.pollEvents();
             float currentTime = (float) GLFW.glfwGetTime();
             float deltaTime = currentTime - lastTime;
             lastTime = currentTime;
@@ -52,7 +66,7 @@ public class Application {
             window.pollEvents();
 
             // Update application state (e.g., move objects, handle input)
-            transform.x += 0.5f * deltaTime;
+            update(deltaTime);
 
             render();
 
@@ -61,13 +75,22 @@ public class Application {
         }
     }
 
+    private void update(float deltaTime) {
+        for (GameObject object : objects) {
+            object.update(deltaTime);
+        }
+    }
+
     private void render() {
         renderer.clear(0.08f, 0.12f, 0.18f, 1.0f);
-        renderer.draw(testMesh, shaderProgram, transform);
+
+        for (GameObject object : objects) {
+            renderer.draw(object.getMesh(), shaderProgram, object.getTransform());
+        }
     }
 
     private void cleanup() {
-        testMesh.cleanup();
+        triangleMesh.cleanup();
         shaderProgram.cleanup();
         window.cleanup();
     }

@@ -1,19 +1,22 @@
-package com.benjaminsimmons.chordscape.graphics;
+package com.benjaminsimmons.chordscape.game;
 
-import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
+import com.benjaminsimmons.chordscape.graphics.Mesh;
+import com.benjaminsimmons.chordscape.graphics.Transform;
 
-public class RenderCircle {
+public class Circle extends GameObject {
 
-    private int vao;
-    private int vbo;
+    public Circle(Mesh mesh, Transform transform) {
+        super(mesh, transform);
+    }
 
-    private final int segments = 4;
-    public float[] vertices = new float[segments * 15]; // 2 for position, 3 for color, times 3 for each point in the triangle fan
+    @Override
+    public void update(float deltaTime) {
+            getTransform().x += 0.25f * deltaTime;
 
-    private double colorTimer = 0.0;
-    private final double colorSpeed = 0.1;
+            if (getTransform().x > 1.2f) {
+                getTransform().x = -1.2f;
+            }
+    }
 
     private float getRandomColor() {
         return (float) Math.random();
