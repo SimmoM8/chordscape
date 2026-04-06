@@ -2,6 +2,7 @@ package com.benjaminsimmons.chordscape.app;
 
 import com.benjaminsimmons.chordscape.game.GameObject;
 import com.benjaminsimmons.chordscape.game.TestObject;
+import com.benjaminsimmons.chordscape.game.World;
 import com.benjaminsimmons.chordscape.graphics.*;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
@@ -15,8 +16,8 @@ public class Application {
     private final Renderer renderer;
     private final ShaderProgram shaderProgram;
 
+    private World world;
     private Mesh triangleMesh;
-    private final List<GameObject> objects = new ArrayList<>();
 
     public Application() {
         this.window = new Window(720, 720, "Chordscape");
@@ -34,6 +35,8 @@ public class Application {
         window.init();
         shaderProgram.init();
 
+        world = new World();
+
         float[] triangleVertices = {
                 // x, y,     r, g, b
                 0.0f,  0.5f, 1.0f, 0.0f, 0.0f,
@@ -43,15 +46,18 @@ public class Application {
 
         triangleMesh = new Mesh(triangleVertices, GL11.GL_TRIANGLES);
 
-        objects.add(new TestObject(
+        world.addObject(new TestObject(
                 triangleMesh,
                 new Transform(-0.5f, 0.0f, 0.25f, 0.25f)
-        ));
+                )
+        );
 
-        objects.add(new TestObject(
-                triangleMesh,
-                new Transform(0.0f, 0.0f, 0.8f, 0.8f)
-        ));
+        world.addObject(
+                new TestObject(
+                        triangleMesh,
+                        new Transform(0.0f, 0.0f, 0.8f, 0.8f)
+                )
+        );
     }
 
     private void loop() {
@@ -76,17 +82,12 @@ public class Application {
     }
 
     private void update(float deltaTime) {
-        for (GameObject object : objects) {
-            object.update(deltaTime);
-        }
+        world.update(deltaTime);
     }
 
     private void render() {
         renderer.clear(0.08f, 0.12f, 0.18f, 1.0f);
-
-        for (GameObject object : objects) {
-            renderer.draw(object.getMesh(), shaderProgram, object.getTransform());
-        }
+        world.render(renderer, shaderProgram);
     }
 
     private void cleanup() {
