@@ -17,6 +17,7 @@ public class Application {
     private final ShaderProgram shaderProgram;
 
     private World world;
+    private Camera camera;
     private Mesh triangleMesh;
 
     public Application() {
@@ -36,6 +37,7 @@ public class Application {
         shaderProgram.init();
 
         world = new World();
+        camera = new Camera(0.0f, -1.0f);
 
         float[] triangleVertices = {
                 // x, y,     r, g, b
@@ -82,12 +84,13 @@ public class Application {
     }
 
     private void update(float deltaTime) {
+        camera.y += 0.1f * deltaTime;
         world.update(deltaTime);
     }
 
     private void render() {
         renderer.clear(0.08f, 0.12f, 0.18f, 1.0f);
-        world.render(renderer, shaderProgram);
+        world.render(renderer, shaderProgram, camera);
     }
 
     private void cleanup() {

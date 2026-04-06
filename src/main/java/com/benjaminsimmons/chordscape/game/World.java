@@ -1,5 +1,6 @@
 package com.benjaminsimmons.chordscape.game;
 
+import com.benjaminsimmons.chordscape.graphics.Camera;
 import com.benjaminsimmons.chordscape.graphics.Renderer;
 import com.benjaminsimmons.chordscape.graphics.ShaderProgram;
 
@@ -19,9 +20,9 @@ public class World {
         }
     }
 
-    public void render(Renderer renderer, ShaderProgram shaderProgram) {
+    public void render(Renderer renderer, ShaderProgram shaderProgram, Camera camera) {
         for (GameObject object : objects) {
-            renderer.draw(object.getMesh(), shaderProgram, object.getTransform());
+            renderer.draw(object.getMesh(), shaderProgram, object.getTransform(), camera);
         }
     }
 }

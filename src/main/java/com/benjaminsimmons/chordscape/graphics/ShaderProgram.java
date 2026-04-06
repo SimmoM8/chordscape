@@ -16,13 +16,15 @@ public class ShaderProgram {
                 out vec3 vertexColor;
                 
                 uniform vec2 uPosition;
+                uniform vec2 uCamera;
                 uniform vec2 uScale;
                 
                 void main() {
                     vec2 scaled = position * uScale;
                     vec2 worldPos = scaled + uPosition;
+                    vec2 viewPos = worldPos - uCamera;
                 
-                    gl_Position = vec4(worldPos, 0.0, 1.0);
+                    gl_Position = vec4(viewPos, 0.0, 1.0);
                     vertexColor = color;
                 }
                 """;
