@@ -1,22 +1,16 @@
 package com.benjaminsimmons.chordscape.game.world;
 
+import com.benjaminsimmons.chordscape.game.music.Note;
+
 public class Cell {
     private final int gridX;
     private final int gridY;
 
-    private boolean hasMusicData;
-
-    private float r;
-    private float g;
-    private float b;
+    private Note note;
 
     public Cell(int gridX, int gridY) {
         this.gridX = gridX;
         this.gridY = gridY;
-        this.hasMusicData = false;
-        this.r = 0.0f;
-        this.g = 0.0f;
-        this.b = 0.0f;
     }
 
     public int getGridX() {
@@ -27,33 +21,19 @@ public class Cell {
         return gridY;
     }
 
-    public boolean hasMusicData() {
-        return hasMusicData;
+    public boolean hasNote() {
+        return note != null;
     }
 
-    public void setColor(float r, float g, float b) {
-        this.hasMusicData = true;
-        this.r = r;
-        this.g = g;
-        this.b = b;
+    public Note getNote() {
+        return note;
     }
 
-    public void clear() {
-        this.hasMusicData = false;
-        this.r = 0.0f;
-        this.g = 0.0f;
-        this.b = 0.0f;
+    public void setNote(Note note) {
+        this.note = note;
     }
 
-    public float getR() {
-        return r;
-    }
-
-    public float getG() {
-        return g;
-    }
-
-    public float getB() {
-        return b;
+    public void clearNote() {
+        this.note = null;
     }
 }

@@ -6,6 +6,7 @@ import com.benjaminsimmons.chordscape.engine.view.Camera;
 import com.benjaminsimmons.chordscape.engine.graphics.Renderer;
 import com.benjaminsimmons.chordscape.engine.graphics.ShaderProgram;
 import com.benjaminsimmons.chordscape.game.entity.GameObject;
+import com.benjaminsimmons.chordscape.game.music.Note;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,10 +84,10 @@ public class World {
         gridVisualDirty = false;
     }
 
-    private void seedTestCells() {
-        grid.getCell(100, 100).setColor(0.8f, 0.2f, 0.2f);
-        grid.getCell(100, 101).setColor(0.2f, 0.8f, 0.2f);
-        grid.getCell(101, 100).setColor(0.2f, 0.4f, 0.9f);
-        grid.getCell(99, 99).setColor(0.9f, 0.8f, 0.2f);
+    private void seedTestCells()
+    {grid.getCell(100, 100).setNote(new Note(0));
+        grid.getCell(100, 101).setNote(new Note(4));
+        grid.getCell(101, 100).setNote(new Note(7));
+        grid.getCell(99, 99).setNote(new Note(2));
     }
 }

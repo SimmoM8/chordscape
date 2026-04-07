@@ -42,7 +42,7 @@ public class Application {
         camera = new Camera(0.0f, 0.0f);
         input = new Input(window.getHandle());
 
-        player = new Player(new Transform(0.0f, 0.0f, 0.1f, 0.1f));
+        player = new Player(new Transform(0.0f, 0.0f, 0.03f, 0.03f));
         //camera.follow(player);
 
         world.addObject(player);

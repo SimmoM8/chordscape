@@ -1,12 +1,14 @@
 package com.benjaminsimmons.chordscape.game.world;
 
 import com.benjaminsimmons.chordscape.engine.graphics.Mesh;
+import com.benjaminsimmons.chordscape.game.music.NoteColorMapper;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class WorldGridMesher {
+    private final NoteColorMapper noteColorMapper = new NoteColorMapper();
 
     public Mesh buildGridLines(WorldGrid grid) {
         int verticalLineCount = grid.getWidth() + 1;
@@ -49,7 +51,7 @@ public class WorldGridMesher {
             for (int col = 0; col < grid.getWidth(); col++) {
                 Cell cell = grid.getCell(row, col);
 
-                if (cell == null || !cell.hasMusicData()) {
+                if (cell == null || !cell.hasNote()) {
                     continue;
                 }
 
@@ -62,9 +64,10 @@ public class WorldGridMesher {
                 float bottom = y + inset;
                 float top = y + cellSize - inset;
 
-                float r = cell.getR();
-                float g = cell.getG();
-                float b = cell.getB();
+                float[] color = noteColorMapper.getColor(cell.getNote());
+                float r = color[0];
+                float g = color[1];
+                float b = color[2];
 
                 addVertex(vertices, left, top, r, g, b);
                 addVertex(vertices, left, bottom, r, g, b);
