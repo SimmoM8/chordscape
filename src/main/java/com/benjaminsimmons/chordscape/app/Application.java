@@ -4,12 +4,9 @@ import com.benjaminsimmons.chordscape.engine.graphics.*;
 import com.benjaminsimmons.chordscape.engine.input.Input;
 import com.benjaminsimmons.chordscape.engine.math.Transform;
 import com.benjaminsimmons.chordscape.engine.view.Camera;
-import com.benjaminsimmons.chordscape.game.entity.GameObject;
 import com.benjaminsimmons.chordscape.game.entity.Player;
-import com.benjaminsimmons.chordscape.game.entity.TestObject;
 import com.benjaminsimmons.chordscape.game.world.World;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 
 public class Application {
 
@@ -39,11 +36,11 @@ public class Application {
         shaderProgram.init();
 
         world = new World();
-        camera = new Camera(0.0f, 0.0f);
+        camera = new Camera(0.0f, 0.0f, 0.3f);
         input = new Input(window.getHandle());
 
-        player = new Player(new Transform(0.0f, 0.0f, 0.03f, 0.03f));
-        //camera.follow(player);
+        player = new Player(new Transform(0.0f, 0.0f, 0.5f, 0.5f));
+        camera.follow(player);
 
         world.addObject(player);
     }

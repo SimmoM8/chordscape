@@ -8,12 +8,14 @@ public class Camera {
 
     private float x;
     private float y;
+    private float zoom;
 
     private Transform followTarget;
 
-    public Camera(float x, float y) {
+    public Camera(float x, float y, float zoom) {
         this.x = x;
         this.y = y;
+        this.zoom = zoom;
     }
 
     public void follow(GameObject target) {
@@ -45,4 +47,8 @@ public class Camera {
     public float getY() {
         return y;
     }
+
+    public float getZoom() { return zoom; }
+
+    public void setZoom(float zoom) { this.zoom = zoom; }
 }

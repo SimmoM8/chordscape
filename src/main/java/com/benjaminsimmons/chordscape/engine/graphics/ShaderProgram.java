@@ -18,11 +18,12 @@ public class ShaderProgram {
                 uniform vec2 uPosition;
                 uniform vec2 uCamera;
                 uniform vec2 uScale;
+                uniform float uZoom;
                 
                 void main() {
                     vec2 scaled = position * uScale;
                     vec2 worldPos = scaled + uPosition;
-                    vec2 viewPos = worldPos - uCamera;
+                    vec2 viewPos = (worldPos - uCamera) * uZoom;
                 
                     gl_Position = vec4(viewPos, 0.0, 1.0);
                     vertexColor = color;
@@ -60,6 +61,11 @@ public class ShaderProgram {
     public void setUniform2f(String name, float x, float y) {
         int location = GL20.glGetUniformLocation(programId, name);
         GL20.glUniform2f(location, x, y);
+    }
+
+    public void setUniform1f(String name, float value) {
+        int location = GL20.glGetUniformLocation(programId, name);
+        GL20.glUniform1f(location, value);
     }
 
     private int compileShader(int type, String source) {

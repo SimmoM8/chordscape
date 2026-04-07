@@ -17,6 +17,7 @@ public class Renderer {
         shader.setUniform2f("uPosition", transform.x, transform.y);
         shader.setUniform2f("uScale", transform.scaleX, transform.scaleY);
         shader.setUniform2f("uCamera", camera.getX(), camera.getY());
+        shader.setUniform1f("uZoom", camera.getZoom());
 
         mesh.render();
 
