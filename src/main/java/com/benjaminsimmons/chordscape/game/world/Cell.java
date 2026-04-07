@@ -5,6 +5,7 @@ public class Cell {
     private final int gridY;
 
     private boolean hasMusicData;
+
     private float r;
     private float g;
     private float b;
@@ -35,6 +36,13 @@ public class Cell {
         this.r = r;
         this.g = g;
         this.b = b;
+    }
+
+    public void clear() {
+        this.hasMusicData = false;
+        this.r = 0.0f;
+        this.g = 0.0f;
+        this.b = 0.0f;
     }
 
     public float getR() {

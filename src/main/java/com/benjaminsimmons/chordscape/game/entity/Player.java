@@ -19,8 +19,15 @@ public class Player extends GameObject {
     }
 
     public void move(float dx, float dy, float deltaTime) {
-        transform.x += (float) (dx * (moveSpeed / Math.sqrt(2)) * deltaTime);
-        transform.y += (float) (dy * (moveSpeed / Math.sqrt(2)) * deltaTime);
+        float length = (float) Math.sqrt(dx * dx + dy * dy);
+
+        if (length > 0.0f) {
+            dx /= length;
+            dy /= length;
+        }
+
+        transform.x += dx * moveSpeed * deltaTime;
+        transform.y += dy * moveSpeed * deltaTime;
     }
 
     private Mesh createMesh() {

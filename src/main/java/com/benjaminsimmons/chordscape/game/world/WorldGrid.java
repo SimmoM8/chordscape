@@ -25,59 +25,6 @@ public class WorldGrid {
         }
     }
 
-    public Mesh createMesh() {
-        int verticalLineCount = width + 1;
-        int horizontalLineCount = height+ 1;
-        int totalLineCount = verticalLineCount + horizontalLineCount;
-
-        float[] vertices = new float[totalLineCount * 2 * 5];
-        int index = 0;
-
-        float greyR = 0.35f;
-        float greyG = 0.35f;
-        float greyB = 0.35f;
-
-        float left = -(width * cellSize) / 2.0f;
-        float right = left + width * cellSize;
-
-        float bottom = -(height * cellSize) / 2.0f;
-        float top = bottom + height * cellSize;
-
-        for (int col = 0; col <= width; col++) {
-            float x = left + col * cellSize;
-
-            vertices[index++] = x;
-            vertices[index++] = bottom;
-            vertices[index++] = greyR;
-            vertices[index++] = greyG;
-            vertices[index++] = greyB;
-
-            vertices[index++] = x;
-            vertices[index++] = top;
-            vertices[index++] = greyR;
-            vertices[index++] = greyG;
-            vertices[index++] = greyB;
-        }
-
-        for (int row = 0; row <= height; row++) {
-            float y = bottom + row * cellSize;
-
-            vertices[index++] = left;
-            vertices[index++] = y;
-            vertices[index++] = greyR;
-            vertices[index++] = greyG;
-            vertices[index++] = greyB;
-
-            vertices[index++] = right;
-            vertices[index++] = y;
-            vertices[index++] = greyR;
-            vertices[index++] = greyG;
-            vertices[index++] = greyB;
-        }
-
-        return new Mesh(vertices, GL11.GL_LINES);
-    }
-
     public int getWidth() {
         return width;
     }
@@ -91,9 +38,24 @@ public class WorldGrid {
     }
 
     public Cell getCell(int row, int col) {
-        if (row < 0 || row >= height || col < 0 || col >= width) {
+        if (isOutBounds(row, col)) {
             return null;
         }
+        return cells[col][row];
+    }
+
+    public boolean isOutBounds(int row, int col) {
+        return row < 0 || row >= height || col < 0 || col >= width;
+    }
+
+    public Cell getCellAtWorldPosition(float worldX, float worldY) {
+        int col = (int) Math.floor(worldX / cellSize + width / 2.0f);
+        int row = (int) Math.floor(worldY / cellSize + height / 2.0f);
+
+        if (isOutBounds(row, col)) {
+            return null;
+        }
+
         return cells[col][row];
     }
 }
