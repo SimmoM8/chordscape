@@ -1,7 +1,7 @@
 package com.benjaminsimmons.chordscape.game.world;
 
-import com.benjaminsimmons.chordscape.engine.graphics.Mesh;
-import org.lwjgl.opengl.GL11;
+import java.util.ArrayList;
+import java.util.List;
 
 public class WorldGrid {
     private final int width;
@@ -9,18 +9,27 @@ public class WorldGrid {
     private final float cellSize;
     private final Cell[][] cells;
 
+    private final int minCellX;
+    private final int maxCellX;
+    private final int minCellY;
+    private final int maxCellY;
+
     public WorldGrid(int width, int height, float cellSize) {
         this.width = width;
         this.height = height;
         this.cellSize = cellSize;
         this.cells = new Cell[width][height];
 
-        int startX = -width / 2;
-        int startY = -height / 2;
+        this.minCellX = -width / 2;
+        this.maxCellX = minCellX + width - 1;
+        this.minCellY = -height / 2;
+        this.maxCellY = minCellY + height - 1;
 
-        for (int row = 0; row < height; row++) {
-            for (int col = 0; col < width; col++) {
-                cells[col][row] = new Cell(startX + col, startY + row);
+        for (int cellY = minCellY; cellY <= maxCellY; cellY++) {
+            for (int cellX = minCellX; cellX <= maxCellX; cellX++) {
+                int arrayCol = toArrayCol(cellX);
+                int arrayRow = toArrayRow(cellY);
+                cells[arrayCol][arrayRow] = new Cell(cellX, cellY);
             }
         }
     }
@@ -37,25 +46,70 @@ public class WorldGrid {
         return cellSize;
     }
 
-    public Cell getCell(int row, int col) {
-        if (isOutBounds(row, col)) {
-            return null;
-        }
-        return cells[col][row];
+    public int getMinCellX() {
+        return minCellX;
     }
 
-    public boolean isOutBounds(int row, int col) {
-        return row < 0 || row >= height || col < 0 || col >= width;
+    public int getMaxCellX() {
+        return maxCellX;
     }
 
-    public Cell getCellAtWorldPosition(float worldX, float worldY) {
-        int col = (int) Math.floor(worldX / cellSize + width / 2.0f);
-        int row = (int) Math.floor(worldY / cellSize + height / 2.0f);
+    public int getMinCellY() {
+        return minCellY;
+    }
 
-        if (isOutBounds(row, col)) {
+    public int getMaxCellY() {
+        return maxCellY;
+    }
+
+    public boolean hasCell(int cellX, int cellY) {
+        return cellX >= minCellX && cellX <= maxCellX
+                && cellY >= minCellY && cellY <= maxCellY;
+    }
+
+    public Cell getCell(int cellX, int cellY) {
+        if (!hasCell(cellX, cellY)) {
             return null;
         }
 
-        return cells[col][row];
+        return cells[toArrayCol(cellX)][toArrayRow(cellY)];
+    }
+
+    public Cell findCellAtWorldCoordinate(float worldX, float worldY) {
+        int cellX = (int) Math.floor(worldX / cellSize);
+        int cellY = (int) Math.floor(worldY / cellSize);
+
+        return getCell(cellX, cellY);
+    }
+
+    public List<Cell> getCellsAround(int centerCellX, int centerCellY, int radius) {
+        List<Cell> result = new ArrayList<>();
+
+        for (int cellY = centerCellY - radius; cellY <= centerCellY + radius; cellY++) {
+            for (int cellX = centerCellX - radius; cellX <= centerCellX + radius; cellX++) {
+                Cell cell = getCell(cellX, cellY);
+                if (cell != null) {
+                    result.add(cell);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public List<Cell> getCellsAround(Cell centerCell, int radius) {
+        if (centerCell == null) {
+            return new ArrayList<>();
+        }
+
+        return getCellsAround(centerCell.getGridX(), centerCell.getGridY(), radius);
+    }
+
+    private int toArrayCol(int cellX) {
+        return cellX - minCellX;
+    }
+
+    private int toArrayRow(int cellY) {
+        return cellY - minCellY;
     }
 }

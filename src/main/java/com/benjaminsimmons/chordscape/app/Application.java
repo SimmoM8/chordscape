@@ -5,6 +5,8 @@ import com.benjaminsimmons.chordscape.engine.input.Input;
 import com.benjaminsimmons.chordscape.engine.math.Transform;
 import com.benjaminsimmons.chordscape.engine.view.Camera;
 import com.benjaminsimmons.chordscape.game.entity.Player;
+import com.benjaminsimmons.chordscape.game.music.LocalMusicContext;
+import com.benjaminsimmons.chordscape.game.world.Cell;
 import com.benjaminsimmons.chordscape.game.world.World;
 import org.lwjgl.glfw.GLFW;
 
@@ -18,6 +20,8 @@ public class Application {
     private Camera camera;
     private Player player;
     private Input input;
+
+    private Cell playerLastCell;
 
     public Application() {
         this.window = new Window(720, 720, "Chordscape");
@@ -70,6 +74,28 @@ public class Application {
         handlePlayerInput(deltaTime);
         world.update(deltaTime);
         camera.update();
+
+        Cell currentCell = world.getCellAtPlayer(player);
+
+        if (currentCell != playerLastCell) {
+            playerLastCell = currentCell;
+
+            if (currentCell != null) {
+                System.out.println("Entered cell: ("
+                        + currentCell.getGridX() + ", "
+                        + currentCell.getGridY() + ")");
+
+                if (currentCell.hasNote()) {
+                    System.out.println("Center note: " + currentCell.getNote().getPitch());
+                } else {
+                    System.out.println("Center note: none");
+                }
+
+                LocalMusicContext context = world.getLocalMusicContext(player, 1);
+                System.out.println("Nearby note count: " + context.getNearbyNotes().size());
+                System.out.println("-----");
+            }
+        }
     }
 
     private void render() {

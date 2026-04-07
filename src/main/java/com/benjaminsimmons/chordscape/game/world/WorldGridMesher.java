@@ -22,22 +22,24 @@ public class WorldGridMesher {
         float greyG = 0.35f;
         float greyB = 0.35f;
 
-        float cellSize = grid.getCellSize();
-        float left = -(grid.getWidth() * cellSize) / 2.0f;
-        float right = left + grid.getWidth() * cellSize;
-        float bottom = -(grid.getHeight() * cellSize) / 2.0f;
-        float top = bottom + grid.getHeight() * cellSize;
+        float minX = grid.getMinCellX();
+        float maxX = grid.getMaxCellX() + 1.0f;
 
-        for (int col = 0; col <= grid.getWidth(); col++) {
-            float x = left + col * cellSize;
-            index = addVertex(vertices, index, x, bottom, greyR, greyG, greyB);
-            index = addVertex(vertices, index, x, top, greyR, greyG, greyB);
+        float minY = grid.getMinCellY();
+        float maxY = grid.getMaxCellY() + 1.0f;
+
+        for (int lineX = grid.getMinCellX(); lineX <= grid.getMaxCellX() + 1; lineX++) {
+            float x = lineX;
+
+            index = addVertex(vertices, index, x, minY, greyR, greyG, greyB);
+            index = addVertex(vertices, index, x, maxY, greyR, greyG, greyB);
         }
 
-        for (int row = 0; row <= grid.getHeight(); row++) {
-            float y = bottom + row * cellSize;
-            index = addVertex(vertices, index, left, y, greyR, greyG, greyB);
-            index = addVertex(vertices, index, right, y, greyR, greyG, greyB);
+        for (int lineY = grid.getMinCellY(); lineY <= grid.getMaxCellY() + 1; lineY++) {
+            float y = lineY;
+
+            index = addVertex(vertices, index, minX, y, greyR, greyG, greyB);
+            index = addVertex(vertices, index, maxX, y, greyR, greyG, greyB);
         }
 
         return new Mesh(vertices, GL11.GL_LINES);
@@ -45,24 +47,23 @@ public class WorldGridMesher {
 
     public Mesh buildColoredCells(WorldGrid grid) {
         List<Float> vertices = new ArrayList<>();
-        float cellSize = grid.getCellSize();
 
-        for (int row = 0; row < grid.getHeight(); row++) {
-            for (int col = 0; col < grid.getWidth(); col++) {
-                Cell cell = grid.getCell(row, col);
+        for (int cellY = grid.getMinCellY(); cellY <= grid.getMaxCellY(); cellY++) {
+            for (int cellX = grid.getMinCellX(); cellX <= grid.getMaxCellX(); cellX++) {
+                Cell cell = grid.getCell(cellX, cellY);
 
                 if (cell == null || !cell.hasNote()) {
                     continue;
                 }
 
-                float x = cell.getGridX() * cellSize;
-                float y = cell.getGridY() * cellSize;
+                float x = cell.getGridX();
+                float y = cell.getGridY();
 
-                float inset = cellSize * 0.08f;
+                float inset = 0.08f;
                 float left = x + inset;
-                float right = x + cellSize - inset;
+                float right = x + 1.0f - inset;
                 float bottom = y + inset;
-                float top = y + cellSize - inset;
+                float top = y + 1.0f - inset;
 
                 float[] color = noteColorMapper.getColor(cell.getNote());
                 float r = color[0];
