@@ -1,4 +1,4 @@
-package com.benjaminsimmons.chordscape.graphics;
+package com.benjaminsimmons.chordscape.engine.graphics;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;

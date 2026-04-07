@@ -1,7 +1,7 @@
-package com.benjaminsimmons.chordscape.game;
+package com.benjaminsimmons.chordscape.game.entity;
 
-import com.benjaminsimmons.chordscape.graphics.Mesh;
-import com.benjaminsimmons.chordscape.graphics.Transform;
+import com.benjaminsimmons.chordscape.engine.graphics.Mesh;
+import com.benjaminsimmons.chordscape.engine.math.Transform;
 
 public class Circle extends GameObject {
 

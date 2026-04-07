@@ -1,5 +1,7 @@
-package com.benjaminsimmons.chordscape.graphics;
+package com.benjaminsimmons.chordscape.engine.graphics;
 
+import com.benjaminsimmons.chordscape.engine.math.Transform;
+import com.benjaminsimmons.chordscape.engine.view.Camera;
 import org.lwjgl.opengl.GL11;
 
 public class Renderer {
@@ -14,7 +16,7 @@ public class Renderer {
 
         shader.setUniform2f("uPosition", transform.x, transform.y);
         shader.setUniform2f("uScale", transform.scaleX, transform.scaleY);
-        shader.setUniform2f("uCamera", camera.x, camera.y);
+        shader.setUniform2f("uCamera", camera.getX(), camera.getY());
 
         mesh.render();
 

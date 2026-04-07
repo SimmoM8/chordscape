@@ -1,14 +1,15 @@
 package com.benjaminsimmons.chordscape.app;
 
-import com.benjaminsimmons.chordscape.game.GameObject;
-import com.benjaminsimmons.chordscape.game.TestObject;
-import com.benjaminsimmons.chordscape.game.World;
-import com.benjaminsimmons.chordscape.graphics.*;
+import com.benjaminsimmons.chordscape.engine.graphics.*;
+import com.benjaminsimmons.chordscape.engine.input.Input;
+import com.benjaminsimmons.chordscape.engine.math.Transform;
+import com.benjaminsimmons.chordscape.engine.view.Camera;
+import com.benjaminsimmons.chordscape.game.entity.GameObject;
+import com.benjaminsimmons.chordscape.game.entity.Player;
+import com.benjaminsimmons.chordscape.game.entity.TestObject;
+import com.benjaminsimmons.chordscape.game.world.World;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Application {
 
@@ -18,7 +19,8 @@ public class Application {
 
     private World world;
     private Camera camera;
-    private Mesh triangleMesh;
+    private Player player;
+    private Input input;
 
     public Application() {
         this.window = new Window(720, 720, "Chordscape");
@@ -37,29 +39,13 @@ public class Application {
         shaderProgram.init();
 
         world = new World();
-        camera = new Camera(0.0f, -1.0f);
+        camera = new Camera(0.0f, 0.0f);
+        input = new Input(window.getHandle());
 
-        float[] triangleVertices = {
-                // x, y,     r, g, b
-                0.0f,  0.5f, 1.0f, 0.0f, 0.0f,
-                -0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-                0.5f, -0.5f, 0.0f, 0.0f, 1.0f
-        };
+        player = new Player(new Transform(0.0f, 0.0f, 0.1f, 0.1f));
+        //camera.follow(player);
 
-        triangleMesh = new Mesh(triangleVertices, GL11.GL_TRIANGLES);
-
-        world.addObject(new TestObject(
-                triangleMesh,
-                new Transform(-0.5f, 0.0f, 0.25f, 0.25f)
-                )
-        );
-
-        world.addObject(
-                new TestObject(
-                        triangleMesh,
-                        new Transform(0.0f, 0.0f, 0.8f, 0.8f)
-                )
-        );
+        world.addObject(player);
     }
 
     private void loop() {
@@ -84,8 +70,9 @@ public class Application {
     }
 
     private void update(float deltaTime) {
-        camera.y += 0.1f * deltaTime;
+        handlePlayerInput(deltaTime);
         world.update(deltaTime);
+        camera.update();
     }
 
     private void render() {
@@ -94,7 +81,8 @@ public class Application {
     }
 
     private void cleanup() {
-        triangleMesh.cleanup();
+        player.getMesh().cleanup();
+        world.cleanup();
         shaderProgram.cleanup();
         window.cleanup();
     }
@@ -109,5 +97,25 @@ public class Application {
 
     public ShaderProgram getShaderProgram() {
         return shaderProgram;
+    }
+
+    private void handlePlayerInput(float deltaTime) {
+        float dx = 0.0f;
+        float dy = 0.0f;
+
+        if (input.isKeyDown(GLFW.GLFW_KEY_LEFT)) {
+            dx -= 1.0f;
+        }
+        if (input.isKeyDown(GLFW.GLFW_KEY_RIGHT)) {
+            dx += 1.0f;
+        }
+        if (input.isKeyDown(GLFW.GLFW_KEY_UP)) {
+            dy += 1.0f;
+        }
+        if (input.isKeyDown(GLFW.GLFW_KEY_DOWN)) {
+            dy -= 1.0f;
+        }
+
+        player.move(dx, dy, deltaTime);
     }
 }
