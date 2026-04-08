@@ -13,11 +13,11 @@ public class Cell {
         this.gridY = gridY;
     }
 
-    public int getGridX() {
+    public int getCellX() {
         return gridX;
     }
 
-    public int getGridY() {
+    public int getCellY() {
         return gridY;
     }
 
@@ -35,5 +35,10 @@ public class Cell {
 
     public void clearNote() {
         this.note = null;
+    }
+
+    @Override
+    public String toString() {
+        return "Cell (" + gridX + ", " + gridY + ")" + (hasNote() ? " has Note: " + note.getPitch() : " has no Note");
     }
 }

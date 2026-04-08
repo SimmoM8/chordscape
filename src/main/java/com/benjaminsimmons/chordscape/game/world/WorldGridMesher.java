@@ -56,8 +56,8 @@ public class WorldGridMesher {
                     continue;
                 }
 
-                float x = cell.getGridX();
-                float y = cell.getGridY();
+                float x = cell.getCellX();
+                float y = cell.getCellY();
 
                 float inset = 0.08f;
                 float left = x + inset;

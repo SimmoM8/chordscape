@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Player extends GameObject {
 
-    private final float moveSpeed = 0.7f;
+    private final float moveSpeed = 3.0f;
 
     public Player(Transform transform) {
         super(transform);

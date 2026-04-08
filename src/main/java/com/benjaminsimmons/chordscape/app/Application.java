@@ -7,8 +7,12 @@ import com.benjaminsimmons.chordscape.engine.view.Camera;
 import com.benjaminsimmons.chordscape.game.entity.Player;
 import com.benjaminsimmons.chordscape.game.music.LocalMusicContext;
 import com.benjaminsimmons.chordscape.game.world.Cell;
+import com.benjaminsimmons.chordscape.game.world.Region;
+import com.benjaminsimmons.chordscape.game.world.SubRegion;
 import com.benjaminsimmons.chordscape.game.world.World;
 import org.lwjgl.glfw.GLFW;
+
+import static java.util.Locale.filter;
 
 public class Application {
 
@@ -40,7 +44,20 @@ public class Application {
         shaderProgram.init();
 
         world = new World();
-        camera = new Camera(0.0f, 0.0f, 0.3f);
+
+        for (SubRegion subRegion : world.getSubRegions()) {
+            if (!subRegion.getPitchProfile().isEmpty()) {
+                System.out.println(subRegion);
+            }
+        }
+
+        for (Region region : world.getRegions()) {
+            if (!region.getPitchProfile().isEmpty()) {
+                System.out.println(region);
+            }
+        }
+
+        camera = new Camera(0.0f, 0.0f, 0.1f);
         input = new Input(window.getHandle());
 
         player = new Player(new Transform(0.0f, 0.0f, 0.5f, 0.5f));
@@ -75,15 +92,20 @@ public class Application {
         world.update(deltaTime);
         camera.update();
 
-        Cell currentCell = world.getCellAtPlayer(player);
+        Cell currentCell = world.getCellContainingPlayer(player);
 
         if (currentCell != playerLastCell) {
             playerLastCell = currentCell;
 
             if (currentCell != null) {
                 System.out.println("Entered cell: ("
-                        + currentCell.getGridX() + ", "
-                        + currentCell.getGridY() + ")");
+                        + currentCell.getCellX() + ", "
+                        + currentCell.getCellY() + ")");
+                System.out.println("Cell is in SubRegion: " + world.getSubRegions().stream()
+                        .filter(subRegion -> subRegion.getCells().contains(currentCell))
+                        .findFirst()
+                        .map(subRegion -> "(" + subRegion.getPosX() + ", " + subRegion.getPosY() + ")")
+                        .orElse("none"));
 
                 if (currentCell.hasNote()) {
                     System.out.println("Center note: " + currentCell.getNote().getPitch());

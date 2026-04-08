@@ -4,6 +4,10 @@ import com.benjaminsimmons.chordscape.app.Application;
 
 public class Main {
     public static void main(String[] args) {
-        new Application().run();
+        try {
+            new Application().run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

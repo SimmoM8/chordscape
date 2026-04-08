@@ -21,10 +21,11 @@ public class WorldGrid {
         this.cells = new Cell[width][height];
 
         this.minCellX = -width / 2;
-        this.maxCellX = minCellX + width - 1;
+        this.maxCellX = minCellX + width - 1; // subtract 1 because cell coordinates are inclusive
         this.minCellY = -height / 2;
         this.maxCellY = minCellY + height - 1;
 
+        // loop through cell coordinates and create Cell objects
         for (int cellY = minCellY; cellY <= maxCellY; cellY++) {
             for (int cellX = minCellX; cellX <= maxCellX; cellX++) {
                 int arrayCol = toArrayCol(cellX);
@@ -62,17 +63,29 @@ public class WorldGrid {
         return maxCellY;
     }
 
-    public boolean hasCell(int cellX, int cellY) {
-        return cellX >= minCellX && cellX <= maxCellX
-                && cellY >= minCellY && cellY <= maxCellY;
-    }
-
     public Cell getCell(int cellX, int cellY) {
         if (!hasCell(cellX, cellY)) {
             return null;
         }
 
         return cells[toArrayCol(cellX)][toArrayRow(cellY)];
+    }
+
+    public List<Cell> getAllCells() {
+        List<Cell> result = new ArrayList<>();
+
+        for (int cellY = minCellY; cellY <= maxCellY; cellY++) {
+            for (int cellX = minCellX; cellX <= maxCellX; cellX++) {
+                result.add(getCell(cellX, cellY));
+            }
+        }
+
+        return result;
+    }
+
+    public boolean hasCell(int cellX, int cellY) {
+        return cellX >= minCellX && cellX <= maxCellX
+                && cellY >= minCellY && cellY <= maxCellY;
     }
 
     public Cell findCellAtWorldCoordinate(float worldX, float worldY) {
@@ -102,7 +115,7 @@ public class WorldGrid {
             return new ArrayList<>();
         }
 
-        return getCellsAround(centerCell.getGridX(), centerCell.getGridY(), radius);
+        return getCellsAround(centerCell.getCellX(), centerCell.getCellY(), radius);
     }
 
     private int toArrayCol(int cellX) {
