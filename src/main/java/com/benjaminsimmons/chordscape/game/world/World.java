@@ -9,6 +9,7 @@ import com.benjaminsimmons.chordscape.game.entity.GameObject;
 import com.benjaminsimmons.chordscape.game.entity.Player;
 import com.benjaminsimmons.chordscape.game.music.LocalMusicContext;
 import com.benjaminsimmons.chordscape.game.music.Note;
+import com.benjaminsimmons.chordscape.game.music.PitchProfile;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -30,6 +31,10 @@ public class World {
     private final Transform worldTransform = new Transform(0.0f, 0.0f);
     private boolean gridVisualDirty = true;
 
+    private static final int INFLUENCE_RADIUS_IN_CELLS = 1;
+    private static final float MIN_TOTAL_INFLUENCE_REQUIRED = 1.0f;
+    private static final float MIN_STRONGEST_PITCH_WEIGHT = 0.1f;
+
     public World() {
         this.grid = new WorldGrid(40, 40, 1.0f);
         this.mesher = new WorldGridMesher();
@@ -38,6 +43,9 @@ public class World {
 
         buildSubRegions();
         buildRegions();
+        refreshPitchProfiles();
+
+        growWorldOnce();
 
         this.subRegionOutlineMesh = buildSubRegionOutlineMesh();
         this.regionOutlineMesh = buildRegionOutlineMesh();
@@ -55,6 +63,9 @@ public class World {
         for (GameObject object : objects) {
             object.update(deltaTime);
         }
+
+        refreshPitchProfiles();
+        growWorldOnce();
 
         if (gridVisualDirty) {
             rebuildColoredCellsMesh();
@@ -179,11 +190,11 @@ public class World {
     }
 
     private void seedTestCells() {
-        grid.getCell(0, 0).setNote(new Note(0));
-        grid.getCell(1, 0).setNote(new Note(1));
-        grid.getCell(0, 1).setNote(new Note(2));
-        grid.getCell(-1, -1).setNote(new Note(3));
-        grid.getCell(2, 2).setNote(new Note(0));
+        grid.getCell(0, 0).setAuthoredNote(new Note(0));
+        grid.getCell(1, 0).setAuthoredNote(new Note(1));
+        grid.getCell(0, 1).setAuthoredNote(new Note(2));
+        grid.getCell(-1, -1).setAuthoredNote(new Note(3));
+        grid.getCell(2, 2).setAuthoredNote(new Note(0));
     }
 
     private Mesh buildSubRegionOutlineMesh() {
@@ -257,5 +268,64 @@ public class World {
             result[i] = vertices.get(i);
         }
         return result;
+    }
+
+    private record ProposedCellNote(Cell cell, Note note) {}
+
+    public void growWorldOnce() {
+        List<ProposedCellNote> proposedNotes = new ArrayList<>();
+
+        for (Cell targetCell : grid.getAllCells()) {
+            if (!targetCell.isEmpty()) {
+                continue;
+            }
+
+            PitchProfile influenceProfile = new PitchProfile();
+            float totalInfluence = 0.0f;
+
+            for (Cell sourceCell : grid.getCellsAround(targetCell, INFLUENCE_RADIUS_IN_CELLS)) {
+                if (sourceCell == null || sourceCell == targetCell || !sourceCell.hasNote()) {
+                    continue;
+                }
+
+                float dx = sourceCell.getCellX() - targetCell.getCellX();
+                float dy = sourceCell.getCellY() - targetCell.getCellY();
+                float distance = (float) Math.sqrt(dx * dx + dy * dy);
+
+                if (distance == 0.0f) {
+                    continue;
+                }
+
+                float distanceWeight = 1.0f / (1.0f + distance);
+                float outgoingStrength = sourceCell.getInfluence();
+                float influence = distanceWeight * outgoingStrength;
+
+                influenceProfile.addPitch(sourceCell.getNote().getPitch(), influence);
+                totalInfluence += influence;
+            }
+
+            if (totalInfluence == 0.0f) {
+                continue;
+            }
+
+            influenceProfile.normalise();
+
+            int strongestPitch = influenceProfile.getStrongestPitch();
+            float strongestPitchWeight = influenceProfile.getWeight(strongestPitch);
+
+            if (totalInfluence >= MIN_TOTAL_INFLUENCE_REQUIRED
+                    && strongestPitchWeight >= MIN_STRONGEST_PITCH_WEIGHT) {
+                proposedNotes.add(new ProposedCellNote(targetCell, new Note(strongestPitch)));
+            }
+        }
+
+        for (ProposedCellNote proposed : proposedNotes) {
+            proposed.cell().setGeneratedNote(proposed.note());
+        }
+
+        if (!proposedNotes.isEmpty()) {
+            refreshPitchProfiles();
+            markGridVisualDirty();
+        }
     }
 }
