@@ -6,7 +6,10 @@ import com.benjaminsimmons.chordscape.engine.math.Transform;
 import com.benjaminsimmons.chordscape.engine.view.Camera;
 import com.benjaminsimmons.chordscape.game.controller.PlayerController;
 import com.benjaminsimmons.chordscape.game.entity.Player;
+import com.benjaminsimmons.chordscape.game.music.CompositionEvent;
+import com.benjaminsimmons.chordscape.game.music.LocalComposition;
 import com.benjaminsimmons.chordscape.game.music.LocalMusicContext;
+import com.benjaminsimmons.chordscape.game.music.LocalWorldSampler;
 import com.benjaminsimmons.chordscape.game.world.Cell;
 import com.benjaminsimmons.chordscape.game.world.Region;
 import com.benjaminsimmons.chordscape.game.world.SubRegion;
@@ -25,6 +28,7 @@ public class Application {
     private PlayerController playerController;
 
     private Cell playerLastCell;
+    private SubRegion playerLastSubRegion;
 
     public Application() {
         this.window = new Window(720, 720, "Chordscape");
@@ -93,6 +97,7 @@ public class Application {
         camera.update();
 
         Cell currentCell = world.getCellContainingPlayer(player);
+        SubRegion currentSubRegion = world.getSubRegionContainingPlayer(player);
 
         if (currentCell != playerLastCell) {
             playerLastCell = currentCell;
@@ -118,6 +123,30 @@ public class Application {
                 System.out.println("-----");
             }
         }
+
+        if (currentSubRegion != playerLastSubRegion) {
+            playerLastSubRegion = currentSubRegion;
+
+            if (currentSubRegion != null) {
+                System.out.println("Entered SubRegion: ("
+                        + currentSubRegion.getPosX() + ", "
+                        + currentSubRegion.getPosY() + ")");
+
+                LocalWorldSampler sampler = new LocalWorldSampler();
+                LocalComposition composition = sampler.build(world, player);
+
+                if (composition != null) {
+                    System.out.println("LocalComposition:");
+                    System.out.println(composition);
+                    for (CompositionEvent event : composition.getEvents()) {
+                        System.out.println(event);
+                    }
+                }
+            } else {
+                System.out.println("Entered SubRegion: none");
+            }
+        }
+
     }
 
     private void render() {

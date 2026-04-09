@@ -328,4 +328,59 @@ public class World {
             markGridVisualDirty();
         }
     }
+
+    public SubRegion getSubRegionContainingPlayer(Player player) {
+        Cell currentCell = getCellContainingPlayer(player);
+        if (currentCell == null) {
+            return null;
+        }
+
+        return getSubRegionContainingCell(currentCell);
+    }
+
+    public SubRegion getSubRegionContainingCell(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+
+        for (SubRegion subRegion : subRegions) {
+            if (subRegion.getCells().contains(cell)) {
+                return subRegion;
+            }
+        }
+
+        return null;
+    }
+
+    public List<SubRegion> getSubRegionsAround(SubRegion centerSubRegion, int radiusInSubRegions) {
+        List<SubRegion> result = new ArrayList<>();
+
+        if (centerSubRegion == null) {
+            return result;
+        }
+
+        int step = SubRegion.SIZE_IN_CELLS;
+
+        int centerX = centerSubRegion.getPosX();
+        int centerY = centerSubRegion.getPosY();
+
+        for (int subRegionY = centerY - radiusInSubRegions * step;
+             subRegionY <= centerY + radiusInSubRegions * step;
+             subRegionY += step) {
+
+            for (int subRegionX = centerX - radiusInSubRegions * step;
+                 subRegionX <= centerX + radiusInSubRegions * step;
+                 subRegionX += step) {
+
+                for (SubRegion subRegion : subRegions) {
+                    if (subRegion.getPosX() == subRegionX && subRegion.getPosY() == subRegionY) {
+                        result.add(subRegion);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
 }
