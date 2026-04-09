@@ -6,10 +6,7 @@ import com.benjaminsimmons.chordscape.engine.math.Transform;
 import com.benjaminsimmons.chordscape.engine.view.Camera;
 import com.benjaminsimmons.chordscape.game.controller.PlayerController;
 import com.benjaminsimmons.chordscape.game.entity.Player;
-import com.benjaminsimmons.chordscape.game.music.CompositionEvent;
-import com.benjaminsimmons.chordscape.game.music.LocalComposition;
-import com.benjaminsimmons.chordscape.game.music.LocalMusicContext;
-import com.benjaminsimmons.chordscape.game.music.LocalWorldSampler;
+import com.benjaminsimmons.chordscape.game.music.*;
 import com.benjaminsimmons.chordscape.game.world.Cell;
 import com.benjaminsimmons.chordscape.game.world.Region;
 import com.benjaminsimmons.chordscape.game.world.SubRegion;
@@ -29,6 +26,9 @@ public class Application {
 
     private Cell playerLastCell;
     private SubRegion playerLastSubRegion;
+
+    private LocalWorldSampler sampler;
+    private LocalCompositionPrinter localCompositionPrinter;
 
     public Application() {
         this.window = new Window(720, 720, "Chordscape");
@@ -68,6 +68,9 @@ public class Application {
         camera.follow(player);
 
         world.addObject(player);
+
+        sampler = new LocalWorldSampler();
+        localCompositionPrinter = new LocalCompositionPrinter();
     }
 
     private void loop() {
@@ -99,7 +102,7 @@ public class Application {
         Cell currentCell = world.getCellContainingPlayer(player);
         SubRegion currentSubRegion = world.getSubRegionContainingPlayer(player);
 
-        if (currentCell != playerLastCell) {
+        /*if (currentCell != playerLastCell) {
             playerLastCell = currentCell;
 
             if (currentCell != null) {
@@ -122,7 +125,7 @@ public class Application {
                 System.out.println("Nearby note count: " + context.getNearbyNotes().size());
                 System.out.println("-----");
             }
-        }
+        }*/
 
         if (currentSubRegion != playerLastSubRegion) {
             playerLastSubRegion = currentSubRegion;
@@ -132,15 +135,11 @@ public class Application {
                         + currentSubRegion.getPosX() + ", "
                         + currentSubRegion.getPosY() + ")");
 
-                LocalWorldSampler sampler = new LocalWorldSampler();
+                sampler = new LocalWorldSampler();
                 LocalComposition composition = sampler.build(world, player);
 
                 if (composition != null) {
-                    System.out.println("LocalComposition:");
-                    System.out.println(composition);
-                    for (CompositionEvent event : composition.getEvents()) {
-                        System.out.println(event);
-                    }
+                    localCompositionPrinter.print(composition);
                 }
             } else {
                 System.out.println("Entered SubRegion: none");
