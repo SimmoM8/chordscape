@@ -1,9 +1,6 @@
 package com.benjaminsimmons.chordscape.app;
 
-import com.benjaminsimmons.chordscape.engine.audio.AudioBuffer;
-import com.benjaminsimmons.chordscape.engine.audio.AudioEngine;
-import com.benjaminsimmons.chordscape.engine.audio.AudioSource;
-import com.benjaminsimmons.chordscape.engine.audio.ToneGenerator;
+import com.benjaminsimmons.chordscape.engine.audio.*;
 import com.benjaminsimmons.chordscape.engine.graphics.*;
 import com.benjaminsimmons.chordscape.engine.input.Input;
 import com.benjaminsimmons.chordscape.engine.math.Transform;
@@ -24,8 +21,7 @@ public class Application {
     private final ShaderProgram shaderProgram;
 
     private AudioEngine audioEngine;
-    private AudioBuffer testBuffer;
-    private AudioSource testSource;
+    private TonePlayer tonePlayer;
 
     private World world;
     private Camera camera;
@@ -37,11 +33,13 @@ public class Application {
 
     private LocalWorldSampler sampler;
     private LocalCompositionPrinter localCompositionPrinter;
+    private CompositionSequencer compositionSequencer;
 
     public Application() {
         this.window = new Window(720, 720, "Chordscape");
         this.renderer = new Renderer();
         this.shaderProgram = new ShaderProgram();
+        this.audioEngine = new AudioEngine();
     }
 
     public void run() {
@@ -53,47 +51,23 @@ public class Application {
     private void init() {
         window.init();
         shaderProgram.init();
-        audioEngine = new AudioEngine();
         audioEngine.init();
-
-        ToneGenerator toneGenerator = new ToneGenerator();
-        testBuffer = new AudioBuffer(
-                toneGenerator.generateSineWave(440.0f, 1.0f, 44100),
-                44100,
-                false
-        );
-
-        testSource = new AudioSource();
-        testSource.setBuffer(testBuffer);
-        testSource.setLooping(true);
-        testSource.setGain(0.2f);
-        testSource.play();
-
+        tonePlayer = new TonePlayer();
         world = new World();
-
-        for (SubRegion subRegion : world.getSubRegions()) {
-            if (!subRegion.getPitchProfile().isEmpty()) {
-                System.out.println(subRegion);
-            }
-        }
-
-        for (Region region : world.getRegions()) {
-            if (!region.getPitchProfile().isEmpty()) {
-                System.out.println(region);
-            }
-        }
-
         camera = new Camera(0.0f, 0.0f, 0.1f);
+        sampler = new LocalWorldSampler();
+        compositionSequencer = new CompositionSequencer(tonePlayer);
+        localCompositionPrinter = new LocalCompositionPrinter();
         Input input = new Input(window.getHandle());
-
         player = new Player(new Transform(0.0f, 0.0f, 0.5f, 0.5f));
         playerController = new PlayerController(input, player, world);
-        camera.follow(player);
 
+        camera.follow(player);
         world.addObject(player);
 
-        sampler = new LocalWorldSampler();
-        localCompositionPrinter = new LocalCompositionPrinter();
+        LocalComposition initialComposition = sampler.build(world, player);
+        compositionSequencer.setComposition(initialComposition);
+
     }
 
     private void loop() {
@@ -125,31 +99,6 @@ public class Application {
         Cell currentCell = world.getCellContainingPlayer(player);
         SubRegion currentSubRegion = world.getSubRegionContainingPlayer(player);
 
-        /*if (currentCell != playerLastCell) {
-            playerLastCell = currentCell;
-
-            if (currentCell != null) {
-                System.out.println("Entered cell: ("
-                        + currentCell.getCellX() + ", "
-                        + currentCell.getCellY() + ")");
-                System.out.println("Cell is in SubRegion: " + world.getSubRegions().stream()
-                        .filter(subRegion -> subRegion.getCells().contains(currentCell))
-                        .findFirst()
-                        .map(subRegion -> "(" + subRegion.getPosX() + ", " + subRegion.getPosY() + ")")
-                        .orElse("none"));
-
-                if (currentCell.hasNote()) {
-                    System.out.println("Center note: " + currentCell.getNote().getPitch());
-                } else {
-                    System.out.println("Center note: none");
-                }
-
-                LocalMusicContext context = world.getLocalMusicContext(player, 1);
-                System.out.println("Nearby note count: " + context.getNearbyNotes().size());
-                System.out.println("-----");
-            }
-        }*/
-
         if (currentSubRegion != playerLastSubRegion) {
             playerLastSubRegion = currentSubRegion;
 
@@ -160,6 +109,7 @@ public class Application {
 
                 sampler = new LocalWorldSampler();
                 LocalComposition composition = sampler.build(world, player);
+                compositionSequencer.setComposition(composition);
 
                 if (composition != null) {
                     localCompositionPrinter.print(composition);
@@ -168,6 +118,10 @@ public class Application {
                 System.out.println("Entered SubRegion: none");
             }
         }
+
+
+        compositionSequencer.update(deltaTime);
+        tonePlayer.update();
 
     }
 
@@ -180,11 +134,8 @@ public class Application {
         player.getMesh().cleanup();
         world.cleanup();
         shaderProgram.cleanup();
-        if (testSource != null) {
-            testSource.cleanup();
-        }
-        if (testBuffer != null) {
-            testBuffer.cleanup();
+        if (tonePlayer != null) {
+            tonePlayer.cleanup();
         }
         if (audioEngine != null) {
             audioEngine.cleanup();
