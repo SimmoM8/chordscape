@@ -1,5 +1,9 @@
 package com.benjaminsimmons.chordscape.app;
 
+import com.benjaminsimmons.chordscape.engine.audio.AudioBuffer;
+import com.benjaminsimmons.chordscape.engine.audio.AudioEngine;
+import com.benjaminsimmons.chordscape.engine.audio.AudioSource;
+import com.benjaminsimmons.chordscape.engine.audio.ToneGenerator;
 import com.benjaminsimmons.chordscape.engine.graphics.*;
 import com.benjaminsimmons.chordscape.engine.input.Input;
 import com.benjaminsimmons.chordscape.engine.math.Transform;
@@ -18,6 +22,10 @@ public class Application {
     private final Window window;
     private final Renderer renderer;
     private final ShaderProgram shaderProgram;
+
+    private AudioEngine audioEngine;
+    private AudioBuffer testBuffer;
+    private AudioSource testSource;
 
     private World world;
     private Camera camera;
@@ -45,6 +53,21 @@ public class Application {
     private void init() {
         window.init();
         shaderProgram.init();
+        audioEngine = new AudioEngine();
+        audioEngine.init();
+
+        ToneGenerator toneGenerator = new ToneGenerator();
+        testBuffer = new AudioBuffer(
+                toneGenerator.generateSineWave(440.0f, 1.0f, 44100),
+                44100,
+                false
+        );
+
+        testSource = new AudioSource();
+        testSource.setBuffer(testBuffer);
+        testSource.setLooping(true);
+        testSource.setGain(0.2f);
+        testSource.play();
 
         world = new World();
 
@@ -157,6 +180,15 @@ public class Application {
         player.getMesh().cleanup();
         world.cleanup();
         shaderProgram.cleanup();
+        if (testSource != null) {
+            testSource.cleanup();
+        }
+        if (testBuffer != null) {
+            testBuffer.cleanup();
+        }
+        if (audioEngine != null) {
+            audioEngine.cleanup();
+        }
         window.cleanup();
     }
 
