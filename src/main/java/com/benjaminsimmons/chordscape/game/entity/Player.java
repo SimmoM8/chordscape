@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Player extends GameObject {
 
-    private final float moveSpeed = 3.0f;
+    private final float velocity = 3.0f;
 
     public Player(Transform transform) {
         super(transform);
@@ -18,19 +18,16 @@ public class Player extends GameObject {
 
     @Override
     public void update(float deltaTime) {
-
     }
 
     public void move(float dx, float dy, float deltaTime) {
         float length = (float) Math.sqrt(dx * dx + dy * dy);
 
-        if (length > 0.0f) {
-            dx /= length;
-            dy /= length;
-        }
+        // Normalize the movement vector to prevent faster diagonal movement
+        if (length > 0.0f) { dx /= length; dy /= length; }
 
-        transform.x += dx * moveSpeed * deltaTime;
-        transform.y += dy * moveSpeed * deltaTime;
+        transform.x += dx * velocity * deltaTime;
+        transform.y += dy * velocity * deltaTime;
     }
 
     private Mesh createMesh() {

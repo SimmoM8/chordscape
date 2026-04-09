@@ -59,7 +59,7 @@ public class Cell {
 
     public void clearNote() {
         this.note = null;
-        this.state = CellState.EMPTY;
+        this.state = CellState.AUTHORED_EMPTY;
     }
 
     public float getInfluence() {
@@ -67,6 +67,7 @@ public class Cell {
             case EMPTY -> 0.0f;
             case GENERATED -> 0.7f;
             case AUTHORED -> 1.2f;
+            case AUTHORED_EMPTY -> 0.3F;
         };
     }
 
@@ -75,6 +76,7 @@ public class Cell {
             case EMPTY -> 0.0f;
             case GENERATED -> 0.35f;
             case AUTHORED -> 1.5f;
+            case AUTHORED_EMPTY -> 1.0F;
         };
     }
 

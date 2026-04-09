@@ -4,6 +4,7 @@ import com.benjaminsimmons.chordscape.engine.graphics.*;
 import com.benjaminsimmons.chordscape.engine.input.Input;
 import com.benjaminsimmons.chordscape.engine.math.Transform;
 import com.benjaminsimmons.chordscape.engine.view.Camera;
+import com.benjaminsimmons.chordscape.game.controller.PlayerController;
 import com.benjaminsimmons.chordscape.game.entity.Player;
 import com.benjaminsimmons.chordscape.game.music.LocalMusicContext;
 import com.benjaminsimmons.chordscape.game.world.Cell;
@@ -11,8 +12,6 @@ import com.benjaminsimmons.chordscape.game.world.Region;
 import com.benjaminsimmons.chordscape.game.world.SubRegion;
 import com.benjaminsimmons.chordscape.game.world.World;
 import org.lwjgl.glfw.GLFW;
-
-import static java.util.Locale.filter;
 
 public class Application {
 
@@ -23,7 +22,7 @@ public class Application {
     private World world;
     private Camera camera;
     private Player player;
-    private Input input;
+    private PlayerController playerController;
 
     private Cell playerLastCell;
 
@@ -58,9 +57,10 @@ public class Application {
         }
 
         camera = new Camera(0.0f, 0.0f, 0.1f);
-        input = new Input(window.getHandle());
+        Input input = new Input(window.getHandle());
 
         player = new Player(new Transform(0.0f, 0.0f, 0.5f, 0.5f));
+        playerController = new PlayerController(input, player, world);
         camera.follow(player);
 
         world.addObject(player);
@@ -88,7 +88,7 @@ public class Application {
     }
 
     private void update(float deltaTime) {
-        handlePlayerInput(deltaTime);
+        playerController.handleInput(deltaTime);
         world.update(deltaTime);
         camera.update();
 
@@ -142,25 +142,5 @@ public class Application {
 
     public ShaderProgram getShaderProgram() {
         return shaderProgram;
-    }
-
-    private void handlePlayerInput(float deltaTime) {
-        float dx = 0.0f;
-        float dy = 0.0f;
-
-        if (input.isKeyDown(GLFW.GLFW_KEY_LEFT)) {
-            dx -= 1.0f;
-        }
-        if (input.isKeyDown(GLFW.GLFW_KEY_RIGHT)) {
-            dx += 1.0f;
-        }
-        if (input.isKeyDown(GLFW.GLFW_KEY_UP)) {
-            dy += 1.0f;
-        }
-        if (input.isKeyDown(GLFW.GLFW_KEY_DOWN)) {
-            dy -= 1.0f;
-        }
-
-        player.move(dx, dy, deltaTime);
     }
 }
