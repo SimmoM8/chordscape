@@ -6,6 +6,7 @@ import com.benjaminsimmons.chordscape.engine.input.Input;
 import com.benjaminsimmons.chordscape.engine.math.Transform;
 import com.benjaminsimmons.chordscape.engine.view.Camera;
 import com.benjaminsimmons.chordscape.game.controller.PlayerController;
+import com.benjaminsimmons.chordscape.game.editor.MusicEditor;
 import com.benjaminsimmons.chordscape.game.entity.Player;
 import com.benjaminsimmons.chordscape.game.music.*;
 import com.benjaminsimmons.chordscape.game.world.Cell;
@@ -33,10 +34,10 @@ public class Application {
 
     private LocalWorldSampler sampler;
     private LocalComposition currentComposition;
-    private LocalCompositionPrinter localCompositionPrinter;
     private LocalCompositionDebugMesher localCompositionDebugMesher;
     private Mesh sampledRegionOutlineMesh;
     private CompositionSequencer compositionSequencer;
+    private MusicEditor musicEditor;
 
     private int lastKnownCellRevision = -1;
 
@@ -62,8 +63,8 @@ public class Application {
         camera = new Camera(0.0f, 0.0f, 0.1f);
         sampler = new LocalWorldSampler();
         compositionSequencer = new CompositionSequencer(tonePlayer);
-        localCompositionPrinter = new LocalCompositionPrinter();
         localCompositionDebugMesher = new LocalCompositionDebugMesher();
+        musicEditor = new MusicEditor();
         Input input = new Input(window.getHandle());
         player = new Player(new Transform(0.0f, 0.0f, 0.5f, 0.5f));
         playerController = new PlayerController(input, player, world);
@@ -75,6 +76,7 @@ public class Application {
         compositionSequencer.setComposition(currentComposition);
         if (currentComposition != null) {
             sampledRegionOutlineMesh = localCompositionDebugMesher.buildSampleOutline(currentComposition);
+            musicEditor.open(currentComposition);
         }
     }
 
@@ -124,8 +126,8 @@ public class Application {
 
             if (currentComposition != null) {
                 sampledRegionOutlineMesh = localCompositionDebugMesher.buildSampleOutline(currentComposition);
-                localCompositionPrinter.print(currentComposition);
                 compositionSequencer.setStartOffset(currentComposition.getPlayerStartSlot());
+                musicEditor.setComposition(currentComposition);
             }
 
         }
@@ -141,6 +143,9 @@ public class Application {
         if (sampledRegionOutlineMesh != null) {
             renderer.draw(sampledRegionOutlineMesh, shaderProgram, new Transform(0.0f, 0.0f), camera);
         }
+        if (musicEditor != null) {
+            musicEditor.render(renderer, shaderProgram, camera);
+        }
     }
 
     private void cleanup() {
@@ -155,6 +160,9 @@ public class Application {
         }
         if (sampledRegionOutlineMesh != null) {
             sampledRegionOutlineMesh.cleanup();
+        }
+        if (musicEditor != null) {
+            musicEditor.cleanup();
         }
         window.cleanup();
     }
