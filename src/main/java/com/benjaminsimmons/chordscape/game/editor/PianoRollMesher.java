@@ -2,6 +2,7 @@ package com.benjaminsimmons.chordscape.game.editor;
 
 import com.benjaminsimmons.chordscape.engine.graphics.Mesh;
 import com.benjaminsimmons.chordscape.game.music.CompositionEvent;
+import com.benjaminsimmons.chordscape.game.music.CompositionSlot;
 import com.benjaminsimmons.chordscape.game.music.LocalComposition;
 import org.lwjgl.opengl.GL11;
 
@@ -10,26 +11,26 @@ import java.util.List;
 
 public class PianoRollMesher {
 
-    private static final float PANEL_LEFT = -0.95f;
-    private static final float PANEL_RIGHT = 0.95f;
-    private static final float PANEL_BOTTOM = -0.95f;
-    private static final float PANEL_TOP = -0.35f;
-
-    private static final int PITCH_ROW_COUNT = 12;
-
-    public Mesh buildBackgroundMesh() {
+    public Mesh buildBackgroundMesh(MusicEditor editor) {
         List<Float> vertices = new ArrayList<>();
 
         float r = 0.10f;
         float g = 0.10f;
         float b = 0.10f;
 
-        addQuad(vertices, PANEL_LEFT, PANEL_BOTTOM, PANEL_RIGHT, PANEL_TOP, r, g, b);
+        addQuad(vertices,
+                editor.getLeft(),
+                editor.getBottom(),
+                editor.getRight(),
+                editor.getTop(),
+                r, g, b);
 
         return new Mesh(toFloatArray(vertices), GL11.GL_TRIANGLES);
     }
 
-    public Mesh buildGridMesh(LocalComposition composition) {
+    public Mesh buildGridMesh(MusicEditor editor) {
+        LocalComposition composition = editor.getComposition();
+
         if (composition == null || composition.getLoopLengthInTimeSlots() <= 0) {
             return null;
         }
@@ -42,28 +43,28 @@ public class PianoRollMesher {
 
         int timeSlotCount = composition.getLoopLengthInTimeSlots();
 
-        float panelWidth = PANEL_RIGHT - PANEL_LEFT;
-        float panelHeight = PANEL_TOP - PANEL_BOTTOM;
+        float panelWidth = editor.getRight() - editor.getLeft();
+        float panelHeight = editor.getTop() - editor.getBottom();
 
         float columnWidth = panelWidth / timeSlotCount;
-        float rowHeight = panelHeight / PITCH_ROW_COUNT;
+        float rowHeight = panelHeight / editor.getPitchRowCount();
 
-        // Vertical grid lines
         for (int i = 0; i <= timeSlotCount; i++) {
-            float x = PANEL_LEFT + i * columnWidth;
-            addLine(vertices, x, PANEL_BOTTOM, x, PANEL_TOP, r, g, b);
+            float x = editor.getLeft() + i * columnWidth;
+            addLine(vertices, x, editor.getBottom(), x, editor.getTop(), r, g, b);
         }
 
-        // Horizontal grid lines
-        for (int i = 0; i <= PITCH_ROW_COUNT; i++) {
-            float y = PANEL_BOTTOM + i * rowHeight;
-            addLine(vertices, PANEL_LEFT, y, PANEL_RIGHT, y, r, g, b);
+        for (int i = 0; i <= editor.getPitchRowCount(); i++) {
+            float y = editor.getBottom() + i * rowHeight;
+            addLine(vertices, editor.getLeft(), y, editor.getRight(), y, r, g, b);
         }
 
         return new Mesh(toFloatArray(vertices), GL11.GL_LINES);
     }
 
-    public Mesh buildNoteMesh(LocalComposition composition) {
+    public Mesh buildNoteMesh(MusicEditor editor) {
+        LocalComposition composition = editor.getComposition();
+
         if (composition == null || composition.getLoopLengthInTimeSlots() <= 0) {
             return null;
         }
@@ -72,33 +73,37 @@ public class PianoRollMesher {
 
         int timeSlotCount = composition.getLoopLengthInTimeSlots();
 
-        float panelWidth = PANEL_RIGHT - PANEL_LEFT;
-        float panelHeight = PANEL_TOP - PANEL_BOTTOM;
+        float panelWidth = editor.getRight() - editor.getLeft();
+        float panelHeight = editor.getTop() - editor.getBottom();
 
         float columnWidth = panelWidth / timeSlotCount;
-        float rowHeight = panelHeight / PITCH_ROW_COUNT;
+        float rowHeight = panelHeight / editor.getPitchRowCount();
 
         float insetX = columnWidth * 0.08f;
         float insetY = rowHeight * 0.10f;
 
-        for (CompositionEvent event : composition.getEvents()) {
-            int timeSlot = event.getTimeSlot();
-            int pitch = event.getPitch();
-            int duration = event.getDuration();
+        for (CompositionSlot slot : composition.getSlots()) {
+            if (!slot.hasNote()) {
+                continue;
+            }
+
+            int timeSlot = slot.getTimeSlot();
+            int pitch = slot.getNote().getPitch();
+            int duration = 1;
 
             if (timeSlot < 0 || timeSlot >= timeSlotCount) {
                 continue;
             }
 
-            if (pitch < 0 || pitch >= PITCH_ROW_COUNT) {
+            if (pitch < 0 || pitch >= editor.getPitchRowCount()) {
                 continue;
             }
 
-            float left = PANEL_LEFT + timeSlot * columnWidth + insetX;
-            float right = PANEL_LEFT + (timeSlot + duration) * columnWidth - insetX;
+            float left = editor.getLeft() + timeSlot * columnWidth + insetX;
+            float right = editor.getLeft() + (timeSlot + duration) * columnWidth - insetX;
 
-            float bottom = PANEL_BOTTOM + pitch * rowHeight + insetY;
-            float top = PANEL_BOTTOM + (pitch + 1) * rowHeight - insetY;
+            float bottom = editor.getBottom() + pitch * rowHeight + insetY;
+            float top = editor.getBottom() + (pitch + 1) * rowHeight - insetY;
 
             float[] color = getPitchColor(pitch);
             addQuad(vertices, left, bottom, right, top, color[0], color[1], color[2]);
@@ -111,12 +116,10 @@ public class PianoRollMesher {
                          float left, float bottom,
                          float right, float top,
                          float r, float g, float b) {
-        // Triangle 1
         addVertex(vertices, left, top, r, g, b);
         addVertex(vertices, left, bottom, r, g, b);
         addVertex(vertices, right, bottom, r, g, b);
 
-        // Triangle 2
         addVertex(vertices, left, top, r, g, b);
         addVertex(vertices, right, bottom, r, g, b);
         addVertex(vertices, right, top, r, g, b);

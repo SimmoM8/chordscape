@@ -12,15 +12,16 @@ import java.util.List;
 public class LocalWorldSampler {
 
     private static final int SUB_REGION_SAMPLE_RADIUS = 1;
-    private static final int SAMPLE_WIDTH_IN_SUB_REGIONS = 2;
-    private static final int SAMPLE_HEIGHT_IN_SUB_REGIONS = 2;
+    private static final int SAMPLE_WIDTH_IN_SUB_REGIONS = 3;
+    private static final int SAMPLE_HEIGHT_IN_SUB_REGIONS = 3;
     private static final int SAMPLE_WIDTH_IN_CELLS = SAMPLE_WIDTH_IN_SUB_REGIONS * SubRegion.SIZE_IN_CELLS;
     private static final int SAMPLE_HEIGHT_IN_CELLS = SAMPLE_HEIGHT_IN_SUB_REGIONS * SubRegion.SIZE_IN_CELLS;
 
     public LocalComposition build(World world, Player player) {
         SubRegion anchorSubRegion = world.getSubRegionContainingPlayer(player);
+        Cell playerCell = world.getCellContainingPlayer(player);
 
-        if (anchorSubRegion == null) {
+        if (anchorSubRegion == null || playerCell == null) {
             return null;
         }
 
@@ -63,31 +64,24 @@ public class LocalWorldSampler {
                         .thenComparingInt(Cell::getCellY)
         );
 
-        for (int slot = 0; slot < sampledCells.size(); slot++) {
-            Cell cell = sampledCells.get(slot);
-            Cell playerCell = world.getCellContainingPlayer(player);
-
-            if (!cell.hasNote()) {
-                continue;
-            }
+        for (int slotIndex = 0; slotIndex < sampledCells.size(); slotIndex++) {
+            Cell cell = sampledCells.get(slotIndex);
 
             if (cell == playerCell) {
-                composition.setPlayerStartSlot(slot);
+                composition.setPlayerStartSlot(slotIndex);
             }
 
-            CompositionEvent event = new CompositionEvent(
-                    cell.getCellX(),
-                    cell.getCellY(),
-                    cell.getNote().getPitch(),
-                    slot,
-                    1,
-                    0
+            composition.addSlot(
+                    new CompositionSlot(
+                            slotIndex,
+                            cell.getCellX(),
+                            cell.getCellY(),
+                            cell.hasNote() ? cell.getNote() : null
+                    )
             );
-
-            composition.addEvent(event);
         }
 
-        composition.setLoopLengthInTimeSlots(12);
+        composition.setLoopLengthInTimeSlots(sampledCells.size());
         return composition;
     }
 

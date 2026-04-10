@@ -44,7 +44,7 @@ public class CompositionSequencer {
     }
 
     public void update(float deltaTime) {
-        if (composition == null || composition.getEvents().isEmpty() || composition.getLoopLengthInTimeSlots() <= 0) {
+        if (composition == null || composition.getLoopLengthInTimeSlots() <= 0) {
             return;
         }
 
@@ -58,13 +58,12 @@ public class CompositionSequencer {
     }
 
     private void playCurrentTimeSlot() {
-        int actualSlot = (startOffset + currentTimeSlot) % composition.getLoopLengthInTimeSlots();
+        int actualSlotIndex = (startOffset + currentTimeSlot) % composition.getLoopLengthInTimeSlots();
+        CompositionSlot slot = composition.getSlotAt(actualSlotIndex);
 
-        for (CompositionEvent event : composition.getEvents()) {
-            if (event.getTimeSlot() == actualSlot) {
-                float frequency = pitchToFrequencyMapper.getFrequency(event.getPitch());
-                tonePlayer.playFrequency(frequency);
-            }
+        if (slot != null && slot.hasNote()) {
+            float frequency = pitchToFrequencyMapper.getFrequency(slot.getNote().getPitch());
+            tonePlayer.playFrequency(frequency);
         }
     }
 

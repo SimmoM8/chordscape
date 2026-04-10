@@ -7,6 +7,7 @@ import com.benjaminsimmons.chordscape.engine.math.Transform;
 import com.benjaminsimmons.chordscape.engine.view.Camera;
 import com.benjaminsimmons.chordscape.game.controller.PlayerController;
 import com.benjaminsimmons.chordscape.game.editor.MusicEditor;
+import com.benjaminsimmons.chordscape.game.editor.MusicEditorController;
 import com.benjaminsimmons.chordscape.game.entity.Player;
 import com.benjaminsimmons.chordscape.game.music.*;
 import com.benjaminsimmons.chordscape.game.world.Cell;
@@ -40,6 +41,8 @@ public class Application {
     private Mesh sampledRegionOutlineMesh;
     private CompositionSequencer compositionSequencer;
     private MusicEditor musicEditor;
+    private MusicEditorController musicEditorController;
+    private Input input;
 
     private int lastKnownCellRevision = -1;
 
@@ -63,6 +66,7 @@ public class Application {
         shaderProgram.init();
         uiShaderProgram.init();
         audioEngine.init();
+        input = new Input(window.getHandle());
         tonePlayer = new TonePlayer();
         world = new World();
         camera = new Camera(0.0f, 0.0f, 0.1f);
@@ -70,7 +74,7 @@ public class Application {
         compositionSequencer = new CompositionSequencer(tonePlayer);
         localCompositionDebugMesher = new LocalCompositionDebugMesher();
         musicEditor = new MusicEditor();
-        Input input = new Input(window.getHandle());
+        musicEditorController = new MusicEditorController(input, musicEditor, world);
         player = new Player(new Transform(0.0f, 0.0f, 0.5f, 0.5f));
         playerController = new PlayerController(input, player, world);
 
@@ -108,6 +112,7 @@ public class Application {
 
     private void update(float deltaTime) {
         playerController.handleInput(deltaTime);
+        musicEditorController.handleInput(window.getWidth(), window.getHeight());
         world.update(deltaTime);
         camera.update();
 

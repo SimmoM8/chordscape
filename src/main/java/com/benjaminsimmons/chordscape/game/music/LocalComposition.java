@@ -8,18 +8,17 @@ public class LocalComposition {
     private final int anchorCellY;
     private final int widthInCells;
     private final int heightInCells;
-    private final List<CompositionEvent> events = new ArrayList<>();
+
+    private final List<CompositionSlot> slots = new ArrayList<>();
 
     private int playerStartSlot = 0;
-
-    private int loopLengthInTimeSlots;
+    private int loopLengthInTimeSlots = 0;
 
     public LocalComposition(int anchorCellX, int anchorCellY, int widthInCells, int heightInCells) {
         this.anchorCellX = anchorCellX;
         this.anchorCellY = anchorCellY;
         this.widthInCells = widthInCells;
         this.heightInCells = heightInCells;
-        this.loopLengthInTimeSlots = 4;
     }
 
     public int getAnchorCellX() {
@@ -38,8 +37,21 @@ public class LocalComposition {
         return heightInCells;
     }
 
-    public List<CompositionEvent> getEvents() {
-        return events;
+    public List<CompositionSlot> getSlots() {
+        return slots;
+    }
+
+    public void addSlot(CompositionSlot slot) {
+        slots.add(slot);
+    }
+
+    public CompositionSlot getSlotAt(int timeSlot) {
+        for (CompositionSlot slot : slots) {
+            if (slot.getTimeSlot() == timeSlot) {
+                return slot;
+            }
+        }
+        return null;
     }
 
     public int getPlayerStartSlot() {
@@ -48,9 +60,6 @@ public class LocalComposition {
 
     public void setPlayerStartSlot(int playerStartSlot) {
         this.playerStartSlot = playerStartSlot;
-    }
-    public void addEvent(CompositionEvent event) {
-        events.add(event);
     }
 
     public int getLoopLengthInTimeSlots() {
@@ -67,7 +76,8 @@ public class LocalComposition {
                 "anchor=(" + anchorCellX + ", " + anchorCellY + ")" +
                 ", widthInCells=" + widthInCells +
                 ", heightInCells=" + heightInCells +
-                ", eventCount=" + events.size() +
+                ", slotCount=" + slots.size() +
+                ", loopLengthInTimeSlots=" + loopLengthInTimeSlots +
                 '}';
     }
 }

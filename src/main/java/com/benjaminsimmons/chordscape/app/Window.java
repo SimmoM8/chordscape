@@ -69,4 +69,12 @@ public class Window {
     public long getHandle() {
         return handle;
     }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
 }

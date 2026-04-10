@@ -7,9 +7,7 @@ import com.benjaminsimmons.chordscape.engine.graphics.Renderer;
 import com.benjaminsimmons.chordscape.engine.graphics.ShaderProgram;
 import com.benjaminsimmons.chordscape.game.entity.GameObject;
 import com.benjaminsimmons.chordscape.game.entity.Player;
-import com.benjaminsimmons.chordscape.game.music.LocalMusicContext;
-import com.benjaminsimmons.chordscape.game.music.Note;
-import com.benjaminsimmons.chordscape.game.music.PitchProfile;
+import com.benjaminsimmons.chordscape.game.music.*;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -406,6 +404,39 @@ public class World {
         Cell cell = getCellContainingPlayer(player);
         if (cell != null) {
             cell.clearNote();
+            markCellsChanged();
+        }
+    }
+
+    public void applyLocalComposition(LocalComposition composition) {
+        if (composition == null) {
+            return;
+        }
+
+        boolean changed = false;
+
+        for (CompositionSlot slot : composition.getSlots()) {
+            Cell cell = grid.getCell(slot.getSourceCellX(), slot.getSourceCellY());
+            if (cell == null) {
+                continue;
+            }
+
+            if (slot.hasNote()) {
+                Note incomingNote = slot.getNote();
+
+                if (!cell.hasNote() || cell.getNote().getPitch() != incomingNote.getPitch() || !cell.isAuthored()) {
+                    cell.setAuthoredNote(new Note(incomingNote.getPitch()));
+                    changed = true;
+                }
+            } else {
+                if (cell.hasNote() || cell.getState() != CellState.AUTHORED_EMPTY) {
+                    cell.clearNote();
+                    changed = true;
+                }
+            }
+        }
+
+        if (changed) {
             markCellsChanged();
         }
     }
