@@ -1,6 +1,8 @@
 package com.benjaminsimmons.chordscape.game.editor;
 
 import com.benjaminsimmons.chordscape.engine.graphics.Mesh;
+import com.benjaminsimmons.chordscape.engine.graphics.UiRenderer;
+import com.benjaminsimmons.chordscape.engine.graphics.UiShaderProgram;
 import com.benjaminsimmons.chordscape.game.music.LocalComposition;
 
 public class MusicEditor {
@@ -63,24 +65,19 @@ public class MusicEditor {
         noteMesh = pianoRollMesher.buildNoteMesh(composition);
     }
 
-    public void render(com.benjaminsimmons.chordscape.engine.graphics.Renderer renderer,
-                       com.benjaminsimmons.chordscape.engine.graphics.ShaderProgram shaderProgram,
-                       com.benjaminsimmons.chordscape.engine.view.Camera camera) {
+    public void render(UiRenderer uiRenderer, UiShaderProgram uiShaderProgram) {
         if (!open) {
             return;
         }
 
-        com.benjaminsimmons.chordscape.engine.math.Transform uiTransform =
-                new com.benjaminsimmons.chordscape.engine.math.Transform(0.0f, 0.0f, 1.0f, 1.0f);
-
         if (backgroundMesh != null) {
-            renderer.draw(backgroundMesh, shaderProgram, uiTransform, camera);
+            uiRenderer.draw(backgroundMesh, uiShaderProgram);
         }
         if (gridMesh != null) {
-            renderer.draw(gridMesh, shaderProgram, uiTransform, camera);
+            uiRenderer.draw(gridMesh, uiShaderProgram);
         }
         if (noteMesh != null) {
-            renderer.draw(noteMesh, shaderProgram, uiTransform, camera);
+            uiRenderer.draw(noteMesh, uiShaderProgram);
         }
     }
 

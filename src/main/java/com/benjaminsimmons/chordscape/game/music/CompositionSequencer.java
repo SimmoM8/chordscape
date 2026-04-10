@@ -4,7 +4,7 @@ import com.benjaminsimmons.chordscape.engine.audio.TonePlayer;
 
 public class CompositionSequencer {
 
-    private static final float SECONDS_PER_TIME_SLOT = 0.1f;
+    private static final float SECONDS_PER_TIME_SLOT = 0.25f;
 
     private final TonePlayer tonePlayer;
     private final PitchToFrequencyMapper pitchToFrequencyMapper;

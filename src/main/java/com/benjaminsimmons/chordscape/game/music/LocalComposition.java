@@ -19,7 +19,7 @@ public class LocalComposition {
         this.anchorCellY = anchorCellY;
         this.widthInCells = widthInCells;
         this.heightInCells = heightInCells;
-        this.loopLengthInTimeSlots = widthInCells * heightInCells;
+        this.loopLengthInTimeSlots = 4;
     }
 
     public int getAnchorCellX() {

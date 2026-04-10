@@ -20,6 +20,8 @@ public class Application {
     private final Window window;
     private final Renderer renderer;
     private final ShaderProgram shaderProgram;
+    private UiRenderer uiRenderer;
+    private UiShaderProgram uiShaderProgram;
 
     private AudioEngine audioEngine;
     private TonePlayer tonePlayer;
@@ -45,6 +47,8 @@ public class Application {
         this.window = new Window(720, 720, "Chordscape");
         this.renderer = new Renderer();
         this.shaderProgram = new ShaderProgram();
+        this.uiRenderer = new UiRenderer();
+        this.uiShaderProgram = new UiShaderProgram();
         this.audioEngine = new AudioEngine();
     }
 
@@ -57,6 +61,7 @@ public class Application {
     private void init() {
         window.init();
         shaderProgram.init();
+        uiShaderProgram.init();
         audioEngine.init();
         tonePlayer = new TonePlayer();
         world = new World();
@@ -144,7 +149,7 @@ public class Application {
             renderer.draw(sampledRegionOutlineMesh, shaderProgram, new Transform(0.0f, 0.0f), camera);
         }
         if (musicEditor != null) {
-            musicEditor.render(renderer, shaderProgram, camera);
+            musicEditor.render(uiRenderer, uiShaderProgram);
         }
     }
 
@@ -152,6 +157,9 @@ public class Application {
         player.getMesh().cleanup();
         world.cleanup();
         shaderProgram.cleanup();
+        if (uiShaderProgram != null) {
+            uiShaderProgram.cleanup();
+        }
         if (tonePlayer != null) {
             tonePlayer.cleanup();
         }

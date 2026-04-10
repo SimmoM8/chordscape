@@ -87,7 +87,7 @@ public class LocalWorldSampler {
             composition.addEvent(event);
         }
 
-        composition.setLoopLengthInTimeSlots(sampledCells.size());
+        composition.setLoopLengthInTimeSlots(12);
         return composition;
     }
 
