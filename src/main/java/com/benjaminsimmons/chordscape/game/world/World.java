@@ -30,6 +30,7 @@ public class World {
 
     private final Transform worldTransform = new Transform(0.0f, 0.0f);
     private boolean gridVisualDirty = true;
+    private int cellRevision = 0;
 
     private static final int INFLUENCE_RADIUS_IN_CELLS = 1;
     private static final float MIN_TOTAL_INFLUENCE_REQUIRED = 1.0f;
@@ -111,6 +112,16 @@ public class World {
 
     public List<Region> getRegions() {
         return regions;
+    }
+
+    public int getCellRevision() {
+        return cellRevision;
+    }
+
+    private void markCellsChanged() {
+        cellRevision++;
+        refreshPitchProfiles();
+        markGridVisualDirty();
     }
 
     public void markGridVisualDirty() {
@@ -324,8 +335,7 @@ public class World {
         }
 
         if (!proposedNotes.isEmpty()) {
-            refreshPitchProfiles();
-            markGridVisualDirty();
+            markCellsChanged();
         }
     }
 
@@ -382,5 +392,21 @@ public class World {
         }
 
         return result;
+    }
+
+    public void placeAuthoredNoteAtPlayer(Player player, int pitch) {
+        Cell cell = getCellContainingPlayer(player);
+        if (cell != null) {
+            cell.setAuthoredNote(new Note(pitch));
+            markCellsChanged();
+        }
+    }
+
+    public void clearCellAtPlayer(Player player) {
+        Cell cell = getCellContainingPlayer(player);
+        if (cell != null) {
+            cell.clearNote();
+            markCellsChanged();
+        }
     }
 }

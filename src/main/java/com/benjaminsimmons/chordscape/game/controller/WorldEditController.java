@@ -15,18 +15,10 @@ public class WorldEditController {
     }
 
     public void editCellAtPlayer(int pitch) {
-        Cell cell = world.getCellContainingPlayer(player);
-        if (cell != null) {
-            cell.setAuthoredNote(new Note(pitch));
-            world.markGridVisualDirty();
-        }
+        world.placeAuthoredNoteAtPlayer(player, pitch);
     }
 
     public void clearCellAtPlayer() {
-        Cell cell = world.getCellContainingPlayer(player);
-        if (cell != null) {
-            cell.clearNote();
-            world.markGridVisualDirty();
-        }
+        world.clearCellAtPlayer(player);
     }
 }

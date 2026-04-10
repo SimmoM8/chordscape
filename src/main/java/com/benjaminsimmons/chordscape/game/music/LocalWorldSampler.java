@@ -12,8 +12,8 @@ import java.util.List;
 public class LocalWorldSampler {
 
     private static final int SUB_REGION_SAMPLE_RADIUS = 1;
-    private static final int SAMPLE_WIDTH_IN_SUB_REGIONS = 3;
-    private static final int SAMPLE_HEIGHT_IN_SUB_REGIONS = 3;
+    private static final int SAMPLE_WIDTH_IN_SUB_REGIONS = 2;
+    private static final int SAMPLE_HEIGHT_IN_SUB_REGIONS = 2;
     private static final int SAMPLE_WIDTH_IN_CELLS = SAMPLE_WIDTH_IN_SUB_REGIONS * SubRegion.SIZE_IN_CELLS;
     private static final int SAMPLE_HEIGHT_IN_CELLS = SAMPLE_HEIGHT_IN_SUB_REGIONS * SubRegion.SIZE_IN_CELLS;
 
@@ -38,45 +38,68 @@ public class LocalWorldSampler {
 
         List<Cell> sampledCells = new ArrayList<>();
 
-        sampledSubRegions.stream()
-                .sorted(Comparator
-                        .comparingInt(SubRegion::getPosX)
-                        .thenComparingInt(SubRegion::getPosY))
-                .forEach(subRegion -> {
-                    List<Cell> orderedCells = subRegion.getCells().stream()
-                            .sorted(Comparator
-                                    .comparingInt(Cell::getCellX)
-                                    .thenComparingInt(Cell::getCellY))
-                            .toList();
+        for (SubRegion subRegion : sampledSubRegions) {
+            for (Cell cell : subRegion.getCells()) {
+                int relativeX = cell.getCellX() - anchorCellX;
+                int relativeY = cell.getCellY() - anchorCellY;
 
-                    sampledCells.addAll(orderedCells);
-                });
+                if (relativeX < 0 || relativeX >= SAMPLE_WIDTH_IN_CELLS
+                        || relativeY < 0 || relativeY >= SAMPLE_HEIGHT_IN_CELLS) {
+                    continue;
+                }
 
-        for (Cell cell : sampledCells) {
+                sampledCells.add(cell);
+            }
+        }
+
+        double centerX = anchorCellX + (SAMPLE_WIDTH_IN_CELLS - 1) / 2.0;
+        double centerY = anchorCellY + (SAMPLE_HEIGHT_IN_CELLS - 1) / 2.0;
+
+        sampledCells.sort(
+                Comparator
+                        .comparingDouble((Cell cell) -> squaredDistanceFromPoint(cell, centerX, centerY))
+                        .thenComparingDouble(cell -> angleFromPoint(cell, centerX, centerY))
+                        .thenComparingInt(Cell::getCellX)
+                        .thenComparingInt(Cell::getCellY)
+        );
+
+        for (int slot = 0; slot < sampledCells.size(); slot++) {
+            Cell cell = sampledCells.get(slot);
+            Cell playerCell = world.getCellContainingPlayer(player);
+
             if (!cell.hasNote()) {
                 continue;
             }
 
-            int relativeX = cell.getCellX() - anchorCellX;
-            int relativeY = cell.getCellY() - anchorCellY;
-
-            if (relativeX < 0 || relativeX >= SAMPLE_WIDTH_IN_CELLS
-                    || relativeY < 0 || relativeY >= SAMPLE_HEIGHT_IN_CELLS) {
-                continue;
+            if (cell == playerCell) {
+                composition.setPlayerStartSlot(slot);
             }
 
             CompositionEvent event = new CompositionEvent(
                     cell.getCellX(),
                     cell.getCellY(),
                     cell.getNote().getPitch(),
-                    relativeX,
+                    slot,
                     1,
-                    relativeY
+                    0
             );
 
             composition.addEvent(event);
         }
 
+        composition.setLoopLengthInTimeSlots(sampledCells.size());
         return composition;
+    }
+
+    private double squaredDistanceFromPoint(Cell cell, double x, double y) {
+        double dx = cell.getCellX() - x;
+        double dy = cell.getCellY() - y;
+        return dx * dx + dy * dy;
+    }
+
+    private double angleFromPoint(Cell cell, double x, double y) {
+        double dx = cell.getCellX() - x;
+        double dy = cell.getCellY() - y;
+        return Math.atan2(dy, dx);
     }
 }
